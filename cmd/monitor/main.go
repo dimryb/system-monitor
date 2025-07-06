@@ -2,13 +2,17 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/dimryb/system-monitor/internal/app"
+	"github.com/dimryb/system-monitor/internal/logger"
 )
 
 func main() {
-	application := app.NewApp()
+	log := logger.New("debug")
+
+	application := app.NewApp(log)
 
 	fmt.Println(application)
 
-	fmt.Println("Starting system-monitor...")
+	log.Debugf("Starting system-monitor...")
 }

@@ -21,6 +21,11 @@ func init() {
 func main() {
 	flag.Parse()
 
+	if flag.Arg(0) == "version" {
+		printVersion()
+		return
+	}
+
 	cfg, err := config.NewMonitorConfig(configPath)
 	if err != nil {
 		log.Fatalf("Config error: %s", err)

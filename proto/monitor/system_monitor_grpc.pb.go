@@ -4,7 +4,7 @@
 // - protoc             v6.31.0
 // source: monitor/system_monitor.proto
 
-package proto
+package monitor
 
 import (
 	context "context"

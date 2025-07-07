@@ -1,2 +1,5 @@
 log:
   level: 'debug'
+
+grpc:
+  port: 50051

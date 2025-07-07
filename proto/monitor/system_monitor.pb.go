@@ -4,7 +4,7 @@
 // 	protoc        v6.31.0
 // source: monitor/system_monitor.proto
 
-package proto
+package monitor
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -698,7 +698,7 @@ const file_monitor_system_monitor_proto_rawDesc = "" +
 	"\bprotocol\x18\x03 \x01(\tR\bprotocol\x12\x10\n" +
 	"\x03bps\x18\x04 \x01(\x04R\x03bps2a\n" +
 	"\rSystemMonitor\x12P\n" +
-	"\tSubscribe\x12\".systemmonitor.SubscriptionRequest\x1a\x1d.systemmonitor.SystemSnapshot0\x01B1Z/github.com/dimryb/system-monitor/internal/protob\x06proto3"
+	"\tSubscribe\x12\".systemmonitor.SubscriptionRequest\x1a\x1d.systemmonitor.SystemSnapshot0\x01B9Z7github.com/dimryb/system-monitor/internal/proto/monitorb\x06proto3"
 
 var (
 	file_monitor_system_monitor_proto_rawDescOnce sync.Once

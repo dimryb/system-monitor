@@ -11,6 +11,10 @@ type (
 	Log struct {
 		Level string `yaml:"level" env:"LOG_LEVEL"`
 	}
+
+	GRPC struct {
+		Port string `yaml:"port" env:"GRPC_PORT"`
+	}
 )
 
 func Load(configPath string, target any) error {

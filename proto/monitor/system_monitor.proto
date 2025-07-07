@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package systemmonitor;
 
-option go_package = "github.com/dimryb/system-monitor/internal/proto";
+option go_package = "github.com/dimryb/system-monitor/internal/proto/monitor";
 
 service SystemMonitor {
   rpc Subscribe(SubscriptionRequest) returns (stream SystemSnapshot);

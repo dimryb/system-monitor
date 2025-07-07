@@ -2,7 +2,8 @@ package config
 
 type (
 	MonitorConfig struct {
-		Log Log `yaml:"log"`
+		Log  Log  `yaml:"log"`
+		GRPC GRPC `yaml:"grpc"`
 	}
 )
 

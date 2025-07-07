@@ -26,7 +26,16 @@ test:
 	go test -race ./internal/...
 
 install-lint-deps:
-	(which golangci-lint > /dev/null) || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.64.5
+	(which golangci-lint > /dev/null) || \
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | \
+	sh -s -- -b $(shell go env GOPATH)/bin v2.2.1
 
 lint: install-lint-deps
 	golangci-lint run ./... -v
+
+generate:
+	protoc \
+		-I proto \
+		--go_out=proto --go_opt=paths=source_relative \
+		--go-grpc_out=proto --go-grpc_opt=paths=source_relative \
+		proto/monitor/*.proto

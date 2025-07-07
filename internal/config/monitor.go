@@ -2,7 +2,7 @@ package config
 
 type (
 	MonitorConfig struct {
-		Log `yaml:"log"`
+		Log Log `yaml:"log"`
 	}
 )
 

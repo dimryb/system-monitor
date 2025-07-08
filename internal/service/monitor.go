@@ -40,7 +40,6 @@ func (s *Monitor) Run(ctx context.Context) error {
 		if err := grpcServer.Run(ctx); err != nil {
 			s.logg.Fatalf("Failed to start gRPC server: %s", err.Error())
 		}
-		s.logg.Debugf("gRPC server started")
 	}()
 
 	s.logg.Infof("System monitor is running...")

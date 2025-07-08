@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"github.com/dimryb/system-monitor/internal/entity"
 	"sync"
 
 	"github.com/dimryb/system-monitor/internal/config"
@@ -10,39 +11,54 @@ import (
 )
 
 type Monitor struct {
-	app  i.Application
-	logg i.Logger
-	cfg  *config.MonitorConfig
+	app       i.Application
+	logg      i.Logger
+	cfg       *config.MonitorConfig
+	scheduler *CollectorService
 }
 
-func NewMonitorService(app i.Application, logger i.Logger, cfg *config.MonitorConfig) *Monitor {
+func NewMonitorService(ctx context.Context, app i.Application, logger i.Logger, cfg *config.MonitorConfig) *Monitor {
+	params := []entity.Parameter{
+		{Command: "cmd"},
+	}
 	return &Monitor{
-		app:  app,
-		logg: logger,
-		cfg:  cfg,
+		app:       app,
+		logg:      logger,
+		cfg:       cfg,
+		scheduler: NewCollectorService(ctx, logger, params),
 	}
 }
 
-func (s *Monitor) Run(ctx context.Context) error {
+func (m *Monitor) Run(ctx context.Context) error {
+	ctx, cancel := context.WithCancel(ctx)
 	wg := &sync.WaitGroup{}
 
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		s.logg.Debugf("gRPC server starting..")
+		m.logg.Debugf("gRPC server starting..")
 		grpcServer := grpc.NewServer(
-			s.app,
+			m.app,
 			grpc.ServerConfig{
-				Port: s.cfg.GRPC.Port,
+				Port: m.cfg.GRPC.Port,
 			},
-			s.logg,
+			m.logg,
 		)
 		if err := grpcServer.Run(ctx); err != nil {
-			s.logg.Fatalf("Failed to start gRPC server: %s", err.Error())
+			m.logg.Fatalf("Failed to start gRPC server: %m", err.Error())
 		}
 	}()
 
-	s.logg.Infof("System monitor is running...")
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if err := m.scheduler.Start(); err != nil {
+			m.logg.Fatalf("Failed to start scheduler: %m", err.Error())
+			cancel()
+		}
+	}()
+
+	m.logg.Infof("System monitor is running...")
 
 	wg.Wait()
 

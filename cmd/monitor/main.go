@@ -36,12 +36,12 @@ func main() {
 
 	logg := logger.New(cfg.Log.Level)
 
-	application := app.NewApp(logg)
-	monitorService := service.NewMonitorService(application, logg, cfg)
-
 	ctx, cancel := signal.NotifyContext(context.Background(),
 		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 	defer cancel()
+
+	application := app.NewApp(logg)
+	monitorService := service.NewMonitorService(ctx, application, logg, cfg)
 
 	logg.Debugf("Starting system-monitor...")
 	if err = monitorService.Run(ctx); err != nil {

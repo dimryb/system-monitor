@@ -17,15 +17,15 @@ type CollectorService struct {
 	wg     sync.WaitGroup
 }
 
-func NewCollectorService(ctx context.Context, log i.Logger, params []entity.Parameter) *CollectorService {
-	return &CollectorService{ctx: ctx, log: log, params: params}
+func NewCollectorService(ctx context.Context, log i.Logger) *CollectorService {
+	return &CollectorService{ctx: ctx, log: log}
 }
 
 func (s *CollectorService) Start() error {
 	errChan := make(chan error, len(s.params))
 
 	for _, p := range s.params {
-		coll := collector.NewCommandCollector(p.Command, time.Second)
+		coll := collector.NewCollector(time.Second)
 
 		s.wg.Add(1)
 		go func(param entity.Parameter, coll i.Collector) {

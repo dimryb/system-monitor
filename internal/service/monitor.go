@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"github.com/dimryb/system-monitor/internal/entity"
 	"sync"
 
 	"github.com/dimryb/system-monitor/internal/config"
@@ -18,14 +17,11 @@ type Monitor struct {
 }
 
 func NewMonitorService(ctx context.Context, app i.Application, logger i.Logger, cfg *config.MonitorConfig) *Monitor {
-	params := []entity.Parameter{
-		{Command: "cmd"},
-	}
 	return &Monitor{
 		app:       app,
 		logg:      logger,
 		cfg:       cfg,
-		scheduler: NewCollectorService(ctx, logger, params),
+		scheduler: NewCollectorService(ctx, logger),
 	}
 }
 

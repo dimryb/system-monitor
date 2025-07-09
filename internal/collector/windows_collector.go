@@ -17,5 +17,5 @@ func NewWindowsSystemCollector(timeout time.Duration) *WindowsCollector {
 
 func (c *WindowsCollector) Collect(ctx context.Context) (*entity.SystemMetrics, error) {
 	_ = ctx
-	return nil, nil
+	return &entity.SystemMetrics{Timestamp: time.Now()}, nil
 }

@@ -17,5 +17,5 @@ func NewLinuxSystemCollector(timeout time.Duration) *LinuxCollector {
 
 func (c *LinuxCollector) Collect(ctx context.Context) (*entity.SystemMetrics, error) {
 	_ = ctx
-	return nil, nil
+	return &entity.SystemMetrics{Timestamp: time.Now()}, nil
 }

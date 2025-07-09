@@ -2,59 +2,86 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"sync"
+	"time"
 
+	"github.com/dimryb/system-monitor/internal/buffer"
 	"github.com/dimryb/system-monitor/internal/config"
 	i "github.com/dimryb/system-monitor/internal/interface"
 	"github.com/dimryb/system-monitor/internal/server/grpc"
 )
 
 type Monitor struct {
-	app       i.Application
-	logg      i.Logger
-	cfg       *config.MonitorConfig
-	scheduler *CollectorService
+	app             i.Application
+	log             i.Logger
+	cfg             *config.MonitorConfig
+	globalCollector *buffer.GlobalCollector
 }
 
 func NewMonitorService(ctx context.Context, app i.Application, logger i.Logger, cfg *config.MonitorConfig) *Monitor {
 	return &Monitor{
-		app:       app,
-		logg:      logger,
-		cfg:       cfg,
-		scheduler: NewCollectorService(ctx, logger),
+		app:             app,
+		log:             logger,
+		cfg:             cfg,
+		globalCollector: buffer.NewGlobalCollector(ctx, logger),
 	}
 }
 
 func (m *Monitor) Run(ctx context.Context) error {
-	ctx, cancel := context.WithCancel(ctx)
 	wg := &sync.WaitGroup{}
 
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		m.logg.Debugf("gRPC server starting..")
+		m.log.Debugf("gRPC server starting..")
 		grpcServer := grpc.NewServer(
 			m.app,
 			grpc.ServerConfig{
 				Port: m.cfg.GRPC.Port,
 			},
-			m.logg,
+			m.log,
 		)
 		if err := grpcServer.Run(ctx); err != nil {
-			m.logg.Fatalf("Failed to start gRPC server: %m", err.Error())
+			m.log.Fatalf("Failed to start gRPC server: %m", err.Error())
 		}
 	}()
+
+	globalCollector := buffer.NewGlobalCollector(ctx, m.log)
+	buf := globalCollector.Register(15)
 
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		if err := m.scheduler.Start(); err != nil {
-			m.logg.Fatalf("Failed to start scheduler: %m", err.Error())
-			cancel()
-		}
+		globalCollector.Start()
 	}()
 
-	m.logg.Infof("System monitor is running...")
+	// Stub register collector
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		ticker := time.NewTicker(time.Second)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-ctx.Done():
+				m.log.Infof("Stub collector stopped.")
+				return
+			case <-ticker.C:
+				data := buf.Get()
+				m.log.Debugf("Buffer size: %d", len(data))
+				fmt.Println("Data:")
+				for _, v := range data {
+					fmt.Println(*v)
+				}
+			}
+		}
+	}()
+	// end Stub
+
+	m.log.Infof("System monitor is running...")
 
 	wg.Wait()
 

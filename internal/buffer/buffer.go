@@ -32,3 +32,9 @@ func (b *ClientBuffer) Add(metric *entity.SystemMetrics) {
 		b.data = b.data[1:]
 	}
 }
+
+func (b *ClientBuffer) Get() []*entity.SystemMetrics {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	return b.data
+}

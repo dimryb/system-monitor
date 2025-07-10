@@ -4,28 +4,45 @@ import (
 	"bytes"
 	"context"
 	"os/exec"
+	"runtime"
 	"strings"
 	"time"
 )
 
-type commandCollector struct {
+type CommandCollector struct {
 	command string
 	timeout time.Duration
 }
 
-func NewCommandCollector(command string, timeout time.Duration) *commandCollector {
-	return &commandCollector{command, timeout}
+func NewCommandCollector(command string, timeout time.Duration) *CommandCollector {
+	return &CommandCollector{command, timeout}
 }
 
-func (c commandCollector) Collect(ctx context.Context) (string, error) {
+func (c CommandCollector) Collect(ctx context.Context) (string, error) {
 	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, "bash", "-c", c.command) //nolint:gosec
+	var cmd *exec.Cmd
+	switch runtime.GOOS {
+	case "windows":
+		cmd = exec.CommandContext(ctx, "cmd.exe", "/C", c.command) //nolint:gosec
+	default:
+		cmd = exec.CommandContext(ctx, "bash", "-c", c.command) //nolint:gosec
+	}
 	var out bytes.Buffer
 	cmd.Stdout = &out
-	if err := cmd.Run(); err != nil {
+	cmd.Stderr = &out
+
+	err := cmd.Run()
+	stdout := strings.TrimSpace(out.String())
+
+	if stdout != "" && err != nil {
+		return stdout, nil
+	}
+
+	if err != nil {
 		return "", err
 	}
-	return strings.TrimSpace(out.String()), nil
+
+	return stdout, nil
 }

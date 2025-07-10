@@ -5,15 +5,15 @@ import (
 	"os"
 )
 
-type fileCollector struct {
+type FileCollector struct {
 	path string
 }
 
-func NewFileCollector(path string) *fileCollector {
-	return &fileCollector{path: path}
+func NewFileCollector(path string) *FileCollector {
+	return &FileCollector{path: path}
 }
 
-func (f fileCollector) Collect(ctx context.Context) (string, error) {
+func (f FileCollector) Collect(ctx context.Context) (string, error) {
 	if ctx.Err() != nil {
 		return "", ctx.Err()
 	}

@@ -10,7 +10,7 @@ import (
 )
 
 type GlobalCollector struct {
-	collector i.Collector
+	collector i.SystemCollector
 	buffers   []*ClientBuffer
 	mu        sync.RWMutex
 	ctx       context.Context

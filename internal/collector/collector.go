@@ -7,7 +7,7 @@ import (
 	i "github.com/dimryb/system-monitor/internal/interface"
 )
 
-func NewCollector(timeout time.Duration) i.Collector {
+func NewCollector(timeout time.Duration) i.SystemCollector {
 	switch runtime.GOOS {
 	case "windows":
 		return NewWindowsSystemCollector(timeout)

@@ -6,6 +6,6 @@ import (
 	"github.com/dimryb/system-monitor/internal/entity"
 )
 
-type Collector interface {
+type SystemCollector interface {
 	Collect(ctx context.Context) (*entity.SystemMetrics, error)
 }

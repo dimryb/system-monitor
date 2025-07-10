@@ -2,6 +2,7 @@ package collector
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -35,12 +36,10 @@ func (c *LinuxCollector) Collect(ctx context.Context) (*entity.SystemMetrics, er
 	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 
-	rawCpuLoad, err := c.cpuCollector.Collect(ctx)
+	cpuLoad, err := parseCPULoad(ctx, c.cpuCollector)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to parse CPU load: %w", err)
 	}
-
-	cpuLoad := parseCPULoad(rawCpuLoad)
 
 	return &entity.SystemMetrics{
 		Timestamp:       time.Now(),
@@ -50,11 +49,16 @@ func (c *LinuxCollector) Collect(ctx context.Context) (*entity.SystemMetrics, er
 	}, nil
 }
 
-func parseCPULoad(raw string) float64 {
+func parseCPULoad(ctx context.Context, collector i.ParamCollector) (float64, error) {
+	raw, err := collector.Collect(ctx)
+	if err != nil {
+		return -1.0, err
+	}
+
 	str := strings.TrimSpace(raw)
 	load, err := strconv.ParseFloat(str, 64)
 	if err != nil {
-		return -1.0
+		return -1.0, err
 	}
-	return load
+	return load, nil
 }

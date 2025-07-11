@@ -15,7 +15,7 @@ const (
 	cpuSystemModeCommandLinux = `top -bn1 | grep "Cpu(s)" | awk '{print $4}' | sed 's/,/./'`
 	cpuIdleCommandLinux       = `top -bn1 | grep "Cpu(s)" | awk '{print $8}' | sed 's/,/./'`
 
-	diskCollectCommandLinux = "df -h /"
+	//diskCollectCommandLinux = "df -h /"
 )
 
 type LinuxCollector struct {

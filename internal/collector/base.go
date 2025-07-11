@@ -78,9 +78,6 @@ type BaseCollector struct {
 }
 
 func (c *BaseCollector) Collect(ctx context.Context) (*entity.SystemMetrics, error) {
-	ctx, cancel := context.WithTimeout(ctx, c.timeout)
-	defer cancel()
-
 	metrics := &entity.SystemMetrics{
 		Timestamp: time.Now(),
 	}

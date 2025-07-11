@@ -11,7 +11,10 @@ import (
 )
 
 const (
-	cpuCollectCommandWindows = `wmic cpu get loadpercentage`
+	cpuCollectCommandWindows           = `wmic cpu get loadpercentage`
+	cpuUserModeCommandWindows          = `(Get-WmiObject -Namespace "root\CIMV2" -Query "SELECT * FROM Win32_PerfFormattedData_Counters_ProcessorInformation WHERE Name='_Total'").PercentUserTime`
+	cpuSystemModeCollectCommandWindows = `(Get-WmiObject -Namespace "root\CIMV2" -Query "SELECT * FROM Win32_PerfFormattedData_Counters_ProcessorInformation WHERE Name='_Total'").PercentPrivilegedTime`
+	cpuIdleCollectCommandWindows       = `(Get-WmiObject -Namespace "root\CIMV2" -Query "SELECT * FROM Win32_PerfFormattedData_Counters_ProcessorInformation WHERE Name='_Total'").PercentIdleTime`
 )
 
 type WindowsCollector struct {
@@ -25,6 +28,18 @@ func NewWindowsSystemCollector(timeout time.Duration) *WindowsCollector {
 			metrics: [metricNumber]metricCollector{
 				CPUUsagePercent: &floatMetric{
 					collector: NewCommandCollector(cpuCollectCommandWindows, timeout),
+					parser:    parseCPULoadWindows,
+				},
+				CPUUserModePercent: &floatMetric{
+					collector: NewCommandCollector(cpuUserModeCommandWindows, timeout),
+					parser:    parseCPULoadWindows,
+				},
+				CPUSystemModePercent: &floatMetric{
+					collector: NewCommandCollector(cpuSystemModeCollectCommandWindows, timeout),
+					parser:    parseCPULoadWindows,
+				},
+				CPUIdlePercent: &floatMetric{
+					collector: NewCommandCollector(cpuIdleCollectCommandWindows, timeout),
 					parser:    parseCPULoadWindows,
 				},
 			},

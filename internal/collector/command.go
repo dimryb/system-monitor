@@ -3,6 +3,7 @@ package collector
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"os/exec"
 	"runtime"
 	"strings"
@@ -25,7 +26,7 @@ func (c CommandCollector) Collect(ctx context.Context) (string, error) {
 	var cmd *exec.Cmd
 	switch runtime.GOOS {
 	case "windows":
-		cmd = exec.CommandContext(ctx, "cmd.exe", "/C", c.command) //nolint:gosec
+		cmd = exec.CommandContext(ctx, "powershell.exe", "-Command", c.command) //nolint:gosec
 	default:
 		cmd = exec.CommandContext(ctx, "bash", "-c", c.command) //nolint:gosec
 	}
@@ -41,7 +42,7 @@ func (c CommandCollector) Collect(ctx context.Context) (string, error) {
 	}
 
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("command failed: %v, output: %s", err, stdout)
 	}
 
 	return stdout, nil

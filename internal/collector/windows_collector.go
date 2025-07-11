@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dimryb/system-monitor/internal/entity"
 	i "github.com/dimryb/system-monitor/internal/interface"
 )
 
@@ -22,23 +23,29 @@ type WindowsCollector struct {
 }
 
 func NewWindowsSystemCollector(timeout time.Duration) *WindowsCollector {
+	metrics := &entity.SystemMetrics{}
 	return &WindowsCollector{
 		BaseCollector: BaseCollector{
 			timeout: timeout,
-			metrics: [metricNumber]metricCollector{
+			metrics: metrics,
+			metricCollectors: [metricNumber]metricCollector{
 				CPUUsagePercent: &floatMetric{
+					value:     &metrics.CPUUsagePercent,
 					collector: NewCommandCollector(cpuCollectCommandWindows, timeout),
 					parser:    parseCPULoadWindows,
 				},
 				CPUUserModePercent: &floatMetric{
+					value:     &metrics.CPUUserModePercent,
 					collector: NewCommandCollector(cpuUserModeCommandWindows, timeout),
 					parser:    parseCPULoadWindows,
 				},
 				CPUSystemModePercent: &floatMetric{
+					value:     &metrics.CPUSystemModePercent,
 					collector: NewCommandCollector(cpuSystemModeCollectCommandWindows, timeout),
 					parser:    parseCPULoadWindows,
 				},
 				CPUIdlePercent: &floatMetric{
+					value:     &metrics.CPUIdlePercent,
 					collector: NewCommandCollector(cpuIdleCollectCommandWindows, timeout),
 					parser:    parseCPULoadWindows,
 				},

@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dimryb/system-monitor/internal/entity"
 	i "github.com/dimryb/system-monitor/internal/interface"
 )
 
@@ -23,23 +24,29 @@ type LinuxCollector struct {
 }
 
 func NewLinuxSystemCollector(timeout time.Duration) *LinuxCollector {
+	metrics := &entity.SystemMetrics{}
 	return &LinuxCollector{
 		BaseCollector: BaseCollector{
 			timeout: timeout,
-			metrics: [metricNumber]metricCollector{
+			metrics: metrics,
+			metricCollectors: [metricNumber]metricCollector{
 				CPUUsagePercent: &floatMetric{
+					value:     &metrics.CPUUsagePercent,
 					collector: NewCommandCollector(cpuUsageCommandLinux, timeout),
 					parser:    parseCPULoadLinux,
 				},
 				CPUUserModePercent: &floatMetric{
+					value:     &metrics.CPUUserModePercent,
 					collector: NewCommandCollector(cpuUserModeCommandLinux, timeout),
 					parser:    parseCPULoadLinux,
 				},
 				CPUSystemModePercent: &floatMetric{
+					value:     &metrics.CPUSystemModePercent,
 					collector: NewCommandCollector(cpuSystemModeCommandLinux, timeout),
 					parser:    parseCPULoadLinux,
 				},
 				CPUIdlePercent: &floatMetric{
+					value:     &metrics.CPUIdlePercent,
 					collector: NewCommandCollector(cpuIdleCommandLinux, timeout),
 					parser:    parseCPULoadLinux,
 				},

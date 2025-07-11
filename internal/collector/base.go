@@ -2,7 +2,9 @@ package collector
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/dimryb/system-monitor/internal/entity"
@@ -23,7 +25,6 @@ const (
 
 type metricCollector interface {
 	collect(ctx context.Context) error
-	setValue(any)
 }
 
 type floatMetric struct {
@@ -41,14 +42,6 @@ func (m *floatMetric) collect(ctx context.Context) error {
 	return nil
 }
 
-func (m *floatMetric) setValue(value any) {
-	val, ok := value.(*float64)
-	if !ok {
-		panic("not float64")
-	}
-	m.value = val
-}
-
 type intMetric struct { //nolint:unused
 	value     *int64
 	collector i.ParamCollector
@@ -64,42 +57,46 @@ func (m *intMetric) collect(ctx context.Context) error { //nolint:unused
 	return nil
 }
 
-func (m *intMetric) setValue(value any) { //nolint:unused
-	val, ok := value.(*int64)
-	if !ok {
-		panic("not int64")
-	}
-	m.value = val
-}
-
 type BaseCollector struct {
-	metrics [metricNumber]metricCollector
-	timeout time.Duration
+	metricCollectors [metricNumber]metricCollector
+	metrics          *entity.SystemMetrics
+	timeout          time.Duration
 }
 
 func (c *BaseCollector) Collect(ctx context.Context) (*entity.SystemMetrics, error) {
-	metrics := &entity.SystemMetrics{
-		Timestamp: time.Now(),
-	}
+	timestamp := time.Now()
+	metrics := entity.SystemMetrics{}
+	wg := sync.WaitGroup{}
+	errChan := make(chan error, len(c.metricCollectors))
 
-	c.metrics[CPUUsagePercent].setValue(&metrics.CPUUsagePercent)
-	c.metrics[CPUUserModePercent].setValue(&metrics.CPUUserModePercent)
-	c.metrics[CPUSystemModePercent].setValue(&metrics.CPUSystemModePercent)
-	c.metrics[CPUIdlePercent].setValue(&metrics.CPUIdlePercent)
-
-	//c.metrics[MemoryUsedMB].setValue(&metrics.MemoryUsedMB)
-	//c.metrics[DiskUsedPercent].setValue(&metrics.DiskUsedPercent)
-
-	for name, mc := range c.metrics {
+	for ind, mc := range c.metricCollectors {
 		if mc == nil {
 			continue
 		}
-		if err := mc.collect(ctx); err != nil {
-			return nil, fmt.Errorf("failed to collect metric %q: %w", name, err)
-		}
+		wg.Add(1)
+		go func(name int, collector metricCollector) {
+			defer wg.Done()
+			if err := mc.collect(ctx); err != nil {
+				errChan <- fmt.Errorf("failed to collect metric %q: %w", name, err)
+			}
+		}(ind, mc)
 	}
 
-	fmt.Println(*metrics)
+	wg.Wait()
+	close(errChan)
 
-	return metrics, nil
+	var errs []error
+	for err := range errChan {
+		errs = append(errs, err)
+	}
+
+	if len(errs) > 0 {
+		return nil, errors.Join(errs...)
+	}
+
+	metrics = *c.metrics
+	metrics.Timestamp = timestamp
+	fmt.Println(metrics)
+
+	return &metrics, nil
 }

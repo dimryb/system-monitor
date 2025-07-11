@@ -11,9 +11,9 @@ import (
 
 const (
 	CPUUsagePercent = iota
-	CPUUserMode
-	CPUSystemMode
-	CPUIdle
+	CPUUserModePercent
+	CPUSystemModePercent
+	CPUIdlePercent
 
 	MemoryUsedMB
 	DiskUsedPercent
@@ -86,7 +86,10 @@ func (c *BaseCollector) Collect(ctx context.Context) (*entity.SystemMetrics, err
 	}
 
 	c.metrics[CPUUsagePercent].setValue(&metrics.CPUUsagePercent)
-	//c.metrics[CPUUserMode].setValue(&metrics.CPUUsagePercent)
+	c.metrics[CPUUserModePercent].setValue(&metrics.CPUUserModePercent)
+	c.metrics[CPUSystemModePercent].setValue(&metrics.CPUSystemModePercent)
+	c.metrics[CPUIdlePercent].setValue(&metrics.CPUIdlePercent)
+
 	//c.metrics[MemoryUsedMB].setValue(&metrics.MemoryUsedMB)
 	//c.metrics[DiskUsedPercent].setValue(&metrics.DiskUsedPercent)
 

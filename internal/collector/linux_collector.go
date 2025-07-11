@@ -10,7 +10,11 @@ import (
 )
 
 const (
-	cpuCollectCommandLinux  = `top -bn1 | grep "Cpu(s)" | awk '{print $2 + $4}' | sed 's/,/./'`
+	cpuUsageCommandLinux      = `top -bn1 | grep "Cpu(s)" | awk '{print $2 + $4 + $6}' | sed 's/,/./'`
+	cpuUserModeCommandLinux   = `top -bn1 | grep "Cpu(s)" | awk '{print $2}' | sed 's/,/./'`
+	cpuSystemModeCommandLinux = `top -bn1 | grep "Cpu(s)" | awk '{print $4}' | sed 's/,/./'`
+	cpuIdleCommandLinux       = `top -bn1 | grep "Cpu(s)" | awk '{print $8}' | sed 's/,/./'`
+
 	diskCollectCommandLinux = "df -h /"
 )
 
@@ -27,6 +31,19 @@ func NewLinuxSystemCollector(timeout time.Duration) *LinuxCollector {
 					collector: NewCommandCollector(cpuUsageCommandLinux, timeout),
 					parser:    parseCPULoadLinux,
 				},
+				CPUUserModePercent: &floatMetric{
+					collector: NewCommandCollector(cpuUserModeCommandLinux, timeout),
+					parser:    parseCPULoadLinux,
+				},
+				CPUSystemModePercent: &floatMetric{
+					collector: NewCommandCollector(cpuSystemModeCommandLinux, timeout),
+					parser:    parseCPULoadLinux,
+				},
+				CPUIdlePercent: &floatMetric{
+					collector: NewCommandCollector(cpuIdleCommandLinux, timeout),
+					parser:    parseCPULoadLinux,
+				},
+
 				//"MemoryUsedMB": intMetric{
 				//	collector: NewFileCollector(memoryCollectCommandLinux),
 				//	parser:    parseMemoryUsageLinux,

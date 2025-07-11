@@ -22,8 +22,8 @@ func NewWindowsSystemCollector(timeout time.Duration) *WindowsCollector {
 	return &WindowsCollector{
 		BaseCollector: BaseCollector{
 			timeout: timeout,
-			metrics: map[string]metricCollector{
-				"CPUUsagePercent": &floatMetric{
+			metrics: [metricNumber]metricCollector{
+				CPUUsagePercent: &floatMetric{
 					collector: NewCommandCollector(cpuCollectCommandWindows, timeout),
 					parser:    parseCPULoadWindows,
 				},

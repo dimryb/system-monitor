@@ -22,9 +22,9 @@ func NewLinuxSystemCollector(timeout time.Duration) *LinuxCollector {
 	return &LinuxCollector{
 		BaseCollector: BaseCollector{
 			timeout: timeout,
-			metrics: map[string]metricCollector{
-				"CPUUsagePercent": &floatMetric{
-					collector: NewCommandCollector(cpuCollectCommandLinux, timeout),
+			metrics: [metricNumber]metricCollector{
+				CPUUsagePercent: &floatMetric{
+					collector: NewCommandCollector(cpuUsageCommandLinux, timeout),
 					parser:    parseCPULoadLinux,
 				},
 				//"MemoryUsedMB": intMetric{

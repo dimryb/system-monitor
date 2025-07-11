@@ -10,9 +10,15 @@ import (
 )
 
 const (
-	CPUUsagePercent = "CPUUsagePercent"
-	MemoryUsedMB    = "MemoryUsedMB"
-	DiskUsedPercent = "DiskUsedPercent"
+	CPUUsagePercent = iota
+	CPUUserMode
+	CPUSystemMode
+	CPUIdle
+
+	MemoryUsedMB
+	DiskUsedPercent
+
+	metricNumber
 )
 
 type metricCollector interface {
@@ -67,7 +73,7 @@ func (m *intMetric) setValue(value any) { //nolint:unused
 }
 
 type BaseCollector struct {
-	metrics map[string]metricCollector
+	metrics [metricNumber]metricCollector
 	timeout time.Duration
 }
 
@@ -80,14 +86,20 @@ func (c *BaseCollector) Collect(ctx context.Context) (*entity.SystemMetrics, err
 	}
 
 	c.metrics[CPUUsagePercent].setValue(&metrics.CPUUsagePercent)
+	//c.metrics[CPUUserMode].setValue(&metrics.CPUUsagePercent)
 	//c.metrics[MemoryUsedMB].setValue(&metrics.MemoryUsedMB)
 	//c.metrics[DiskUsedPercent].setValue(&metrics.DiskUsedPercent)
 
 	for name, mc := range c.metrics {
+		if mc == nil {
+			continue
+		}
 		if err := mc.collect(ctx); err != nil {
 			return nil, fmt.Errorf("failed to collect metric %q: %w", name, err)
 		}
 	}
+
+	fmt.Println(*metrics)
 
 	return metrics, nil
 }

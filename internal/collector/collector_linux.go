@@ -13,12 +13,12 @@ import (
 )
 
 const (
-	cpuUsageCommandLinux      = `top -bn1 | grep "Cpu(s)" | awk '{print $2 + $4 + $6}' | sed 's/,/./'`
-	cpuUserModeCommandLinux   = `top -bn1 | grep "Cpu(s)" | awk '{print $2}' | sed 's/,/./'`
-	cpuSystemModeCommandLinux = `top -bn1 | grep "Cpu(s)" | awk '{print $4}' | sed 's/,/./'`
-	cpuIdleCommandLinux       = `top -bn1 | grep "Cpu(s)" | awk '{print $8}' | sed 's/,/./'`
+	cpuUsageCommand      = `top -bn1 | grep "Cpu(s)" | awk '{print $2 + $4 + $6}' | sed 's/,/./'`
+	cpuUserModeCommand   = `top -bn1 | grep "Cpu(s)" | awk '{print $2}' | sed 's/,/./'`
+	cpuSystemModeCommand = `top -bn1 | grep "Cpu(s)" | awk '{print $4}' | sed 's/,/./'`
+	cpuIdleCommand       = `top -bn1 | grep "Cpu(s)" | awk '{print $8}' | sed 's/,/./'`
 
-	//diskCollectCommandLinux = "df -h /"
+	//diskCollectCommand = "df -h /"
 )
 
 type LinuxCollector struct {
@@ -34,31 +34,31 @@ func NewSystemCollector(timeout time.Duration) *LinuxCollector {
 			metricCollectors: [metricNumber]metricCollector{
 				CPUUsagePercent: &floatMetric{
 					value:     &metrics.CPUUsagePercent,
-					collector: NewCommandCollector(cpuUsageCommandLinux, timeout),
-					parser:    parseCPULoadLinux,
+					collector: NewCommandCollector(cpuUsageCommand, timeout),
+					parser:    parseCPULoad,
 				},
 				CPUUserModePercent: &floatMetric{
 					value:     &metrics.CPUUserModePercent,
-					collector: NewCommandCollector(cpuUserModeCommandLinux, timeout),
-					parser:    parseCPULoadLinux,
+					collector: NewCommandCollector(cpuUserModeCommand, timeout),
+					parser:    parseCPULoad,
 				},
 				CPUSystemModePercent: &floatMetric{
 					value:     &metrics.CPUSystemModePercent,
-					collector: NewCommandCollector(cpuSystemModeCommandLinux, timeout),
-					parser:    parseCPULoadLinux,
+					collector: NewCommandCollector(cpuSystemModeCommand, timeout),
+					parser:    parseCPULoad,
 				},
 				CPUIdlePercent: &floatMetric{
 					value:     &metrics.CPUIdlePercent,
-					collector: NewCommandCollector(cpuIdleCommandLinux, timeout),
-					parser:    parseCPULoadLinux,
+					collector: NewCommandCollector(cpuIdleCommand, timeout),
+					parser:    parseCPULoad,
 				},
 
 				//"MemoryUsedMB": intMetric{
-				//	collector: NewFileCollector(memoryCollectCommandLinux),
+				//	collector: NewFileCollector(memoryCollectCommand),
 				//	parser:    parseMemoryUsageLinux,
 				//},
 				//"DiskUsedPercent": floatMetric{
-				//	collector: NewCommandCollector(diskCollectCommandLinux, timeout),
+				//	collector: NewCommandCollector(diskCollectCommand, timeout),
 				//	parser:    parseDiskUsageLinux,
 				//},
 			},
@@ -66,7 +66,7 @@ func NewSystemCollector(timeout time.Duration) *LinuxCollector {
 	}
 }
 
-func parseCPULoadLinux(ctx context.Context, collector i.ParamCollector) (float64, error) {
+func parseCPULoad(ctx context.Context, collector i.ParamCollector) (float64, error) {
 	raw, err := collector.Collect(ctx)
 	if err != nil {
 		return -1.0, err

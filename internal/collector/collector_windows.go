@@ -14,10 +14,10 @@ import (
 )
 
 const (
-	cpuCollectCommandWindows           = `wmic cpu get loadpercentage`
-	cpuUserModeCommandWindows          = `(Get-WmiObject -Namespace "root\CIMV2" -Query "SELECT * FROM Win32_PerfFormattedData_Counters_ProcessorInformation WHERE Name='_Total'").PercentUserTime`
-	cpuSystemModeCollectCommandWindows = `(Get-WmiObject -Namespace "root\CIMV2" -Query "SELECT * FROM Win32_PerfFormattedData_Counters_ProcessorInformation WHERE Name='_Total'").PercentPrivilegedTime`
-	cpuIdleCollectCommandWindows       = `(Get-WmiObject -Namespace "root\CIMV2" -Query "SELECT * FROM Win32_PerfFormattedData_Counters_ProcessorInformation WHERE Name='_Total'").PercentIdleTime`
+	cpuCollectCommand           = `wmic cpu get loadpercentage`
+	cpuUserModeCommand          = `(Get-WmiObject -Namespace "root\CIMV2" -Query "SELECT * FROM Win32_PerfFormattedData_Counters_ProcessorInformation WHERE Name='_Total'").PercentUserTime`
+	cpuSystemModeCollectCommand = `(Get-WmiObject -Namespace "root\CIMV2" -Query "SELECT * FROM Win32_PerfFormattedData_Counters_ProcessorInformation WHERE Name='_Total'").PercentPrivilegedTime`
+	cpuIdleCollectCommand       = `(Get-WmiObject -Namespace "root\CIMV2" -Query "SELECT * FROM Win32_PerfFormattedData_Counters_ProcessorInformation WHERE Name='_Total'").PercentIdleTime`
 )
 
 type WindowsCollector struct {
@@ -33,30 +33,30 @@ func NewSystemCollector(timeout time.Duration) *WindowsCollector {
 			metricCollectors: [metricNumber]metricCollector{
 				CPUUsagePercent: &floatMetric{
 					value:     &metrics.CPUUsagePercent,
-					collector: NewCommandCollector(cpuCollectCommandWindows, timeout),
-					parser:    parseCPULoadWindows,
+					collector: NewCommandCollector(cpuCollectCommand, timeout),
+					parser:    parseCPULoad,
 				},
 				CPUUserModePercent: &floatMetric{
 					value:     &metrics.CPUUserModePercent,
-					collector: NewCommandCollector(cpuUserModeCommandWindows, timeout),
-					parser:    parseCPULoadWindows,
+					collector: NewCommandCollector(cpuUserModeCommand, timeout),
+					parser:    parseCPULoad,
 				},
 				CPUSystemModePercent: &floatMetric{
 					value:     &metrics.CPUSystemModePercent,
-					collector: NewCommandCollector(cpuSystemModeCollectCommandWindows, timeout),
-					parser:    parseCPULoadWindows,
+					collector: NewCommandCollector(cpuSystemModeCollectCommand, timeout),
+					parser:    parseCPULoad,
 				},
 				CPUIdlePercent: &floatMetric{
 					value:     &metrics.CPUIdlePercent,
-					collector: NewCommandCollector(cpuIdleCollectCommandWindows, timeout),
-					parser:    parseCPULoadWindows,
+					collector: NewCommandCollector(cpuIdleCollectCommand, timeout),
+					parser:    parseCPULoad,
 				},
 			},
 		},
 	}
 }
 
-func parseCPULoadWindows(ctx context.Context, collector i.ParamCollector) (float64, error) {
+func parseCPULoad(ctx context.Context, collector i.ParamCollector) (float64, error) {
 	raw, err := collector.Collect(ctx)
 	if err != nil {
 		return -1.0, err

@@ -1,3 +1,5 @@
+//go:build linux
+
 package collector
 
 import (
@@ -23,7 +25,7 @@ type LinuxCollector struct {
 	BaseCollector
 }
 
-func NewLinuxSystemCollector(timeout time.Duration) *LinuxCollector {
+func NewSystemCollector(timeout time.Duration) *LinuxCollector {
 	metrics := &entity.SystemMetrics{}
 	return &LinuxCollector{
 		BaseCollector: BaseCollector{

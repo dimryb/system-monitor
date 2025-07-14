@@ -1,3 +1,5 @@
+//go:build windows
+
 package collector
 
 import (
@@ -22,7 +24,7 @@ type WindowsCollector struct {
 	BaseCollector
 }
 
-func NewWindowsSystemCollector(timeout time.Duration) *WindowsCollector {
+func NewSystemCollector(timeout time.Duration) *WindowsCollector {
 	metrics := &entity.SystemMetrics{}
 	return &WindowsCollector{
 		BaseCollector: BaseCollector{

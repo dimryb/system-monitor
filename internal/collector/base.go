@@ -33,11 +33,16 @@ type metricCollector interface {
 type floatMetric struct {
 	value     *float64
 	collector i.ParamCollector
-	parser    func(context.Context, i.ParamCollector) (float64, error)
+	parser    func(rawData string) (float64, error)
 }
 
 func (m *floatMetric) collect(ctx context.Context) error {
-	val, err := m.parser(ctx, m.collector)
+	raw, err := m.collector.Collect(ctx)
+	if err != nil {
+		return err
+	}
+
+	val, err := m.parser(raw)
 	if err != nil {
 		return err
 	}
@@ -48,11 +53,16 @@ func (m *floatMetric) collect(ctx context.Context) error {
 type intMetric struct { //nolint:unused
 	value     *int64
 	collector i.ParamCollector
-	parser    func(context.Context, i.ParamCollector) (int64, error)
+	parser    func(rawData string) (int64, error)
 }
 
 func (m *intMetric) collect(ctx context.Context) error { //nolint:unused
-	val, err := m.parser(ctx, m.collector)
+	raw, err := m.collector.Collect(ctx)
+	if err != nil {
+		return err
+	}
+
+	val, err := m.parser(raw)
 	if err != nil {
 		return err
 	}

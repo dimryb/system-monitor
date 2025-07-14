@@ -3,13 +3,11 @@
 package collector
 
 import (
-	"context"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/dimryb/system-monitor/internal/entity"
-	i "github.com/dimryb/system-monitor/internal/interface"
 )
 
 const (
@@ -35,22 +33,22 @@ func NewSystemCollector(timeout time.Duration) *LinuxCollector {
 				CPUUsagePercent: &floatMetric{
 					value:     &metrics.CPUUsagePercent,
 					collector: NewCommandCollector(cpuUsageCommand, timeout),
-					parser:    parseCPULoad,
+					parser:    parseFloatMetric,
 				},
 				CPUUserModePercent: &floatMetric{
 					value:     &metrics.CPUUserModePercent,
 					collector: NewCommandCollector(cpuUserModeCommand, timeout),
-					parser:    parseCPULoad,
+					parser:    parseFloatMetric,
 				},
 				CPUSystemModePercent: &floatMetric{
 					value:     &metrics.CPUSystemModePercent,
 					collector: NewCommandCollector(cpuSystemModeCommand, timeout),
-					parser:    parseCPULoad,
+					parser:    parseFloatMetric,
 				},
 				CPUIdlePercent: &floatMetric{
 					value:     &metrics.CPUIdlePercent,
 					collector: NewCommandCollector(cpuIdleCommand, timeout),
-					parser:    parseCPULoad,
+					parser:    parseFloatMetric,
 				},
 
 				//"MemoryUsedMB": intMetric{
@@ -66,13 +64,8 @@ func NewSystemCollector(timeout time.Duration) *LinuxCollector {
 	}
 }
 
-func parseCPULoad(ctx context.Context, collector i.ParamCollector) (float64, error) {
-	raw, err := collector.Collect(ctx)
-	if err != nil {
-		return -1.0, err
-	}
-
-	str := strings.TrimSpace(raw)
+func parseFloatMetric(rawData string) (float64, error) {
+	str := strings.TrimSpace(rawData)
 	load, err := strconv.ParseFloat(str, 64)
 	if err != nil {
 		return -1.0, err

@@ -3,14 +3,12 @@
 package collector
 
 import (
-	"context"
 	"fmt"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/dimryb/system-monitor/internal/entity"
-	i "github.com/dimryb/system-monitor/internal/interface"
 )
 
 const (
@@ -71,13 +69,8 @@ func NewSystemCollector(timeout time.Duration) *WindowsCollector {
 	}
 }
 
-func parseCPULoad(ctx context.Context, collector i.ParamCollector) (float64, error) {
-	raw, err := collector.Collect(ctx)
-	if err != nil {
-		return -1.0, err
-	}
-
-	lines := strings.Split(raw, "\n")
+func parseCPULoad(rawData string) (float64, error) {
+	lines := strings.Split(rawData, "\n")
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
 		if line == "" || line == "LoadPercentage" {
@@ -92,13 +85,8 @@ func parseCPULoad(ctx context.Context, collector i.ParamCollector) (float64, err
 	return -1.0, fmt.Errorf("cpu load not found")
 }
 
-func parseFloatMetric(ctx context.Context, collector i.ParamCollector) (float64, error) {
-	raw, err := collector.Collect(ctx)
-	if err != nil {
-		return -1.0, err
-	}
-
-	lines := strings.Split(raw, "\n")
+func parseFloatMetric(rawData string) (float64, error) {
+	lines := strings.Split(rawData, "\n")
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
 		if line == "" {
@@ -113,13 +101,8 @@ func parseFloatMetric(ctx context.Context, collector i.ParamCollector) (float64,
 	return -1.0, fmt.Errorf("numeric value not found in command output")
 }
 
-func parseDiskIO(ctx context.Context, collector i.ParamCollector, fieldName string) (float64, error) {
-	raw, err := collector.Collect(ctx)
-	if err != nil {
-		return -1.0, err
-	}
-
-	lines := strings.Split(raw, "\n")
+func parseDiskIO(rawData string, fieldName string) (float64, error) {
+	lines := strings.Split(rawData, "\n")
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
 		if line == "" || strings.Contains(line, "Name") {
@@ -146,29 +129,28 @@ func parseDiskIO(ctx context.Context, collector i.ParamCollector, fieldName stri
 	return -1.0, fmt.Errorf("field %s not found in disk IO output", fieldName)
 }
 
-func parseDiskReadsPerSec(ctx context.Context, collector i.ParamCollector) (float64, error) {
-	return parseDiskIO(ctx, collector, "DiskReadsPersec")
+func parseDiskReadsPerSec(rawData string) (float64, error) {
+	return parseDiskIO(rawData, "DiskReadsPersec")
 }
 
-func parseDiskWritesPerSec(ctx context.Context, collector i.ParamCollector) (float64, error) {
-	return parseDiskIO(ctx, collector, "DiskWritesPersec")
+func parseDiskWritesPerSec(rawData string) (float64, error) {
+	return parseDiskIO(rawData, "DiskWritesPersec")
 }
 
-func parseDiskTransfersPerSec(ctx context.Context, collector i.ParamCollector) (float64, error) {
-	return parseDiskTransfersPerSecWithParsers(ctx, collector, parseDiskReadsPerSec, parseDiskWritesPerSec)
+func parseDiskTransfersPerSec(rawData string) (float64, error) {
+	return parseDiskTransfersPerSecWithParsers(rawData, parseDiskReadsPerSec, parseDiskWritesPerSec)
 }
 
 func parseDiskTransfersPerSecWithParsers(
-	ctx context.Context,
-	collector i.ParamCollector,
-	readParser func(context.Context, i.ParamCollector) (float64, error),
-	writeParser func(context.Context, i.ParamCollector) (float64, error),
+	rawData string,
+	readParser func(string) (float64, error),
+	writeParser func(string) (float64, error),
 ) (float64, error) {
-	read, err := readParser(ctx, collector)
+	read, err := readParser(rawData)
 	if err != nil {
 		return -1.0, err
 	}
-	write, err := writeParser(ctx, collector)
+	write, err := writeParser(rawData)
 	if err != nil {
 		return -1.0, err
 	}

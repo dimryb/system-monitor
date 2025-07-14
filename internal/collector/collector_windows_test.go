@@ -3,25 +3,10 @@
 package collector
 
 import (
-	"context"
-	i "github.com/dimryb/system-monitor/internal/interface"
-	"github.com/stretchr/testify/assert"
 	"testing"
-	"time"
+
+	"github.com/stretchr/testify/assert"
 )
-
-type fakeCollector struct {
-	output string
-	err    error
-}
-
-func (f *fakeCollector) Collect(ctx context.Context) (string, error) {
-	return f.output, f.err
-}
-
-func (f *fakeCollector) Timeout() time.Duration {
-	return time.Second
-}
 
 func TestParseCPULoad(t *testing.T) {
 	tests := []struct {
@@ -32,13 +17,13 @@ func TestParseCPULoad(t *testing.T) {
 	}{
 		{
 			name:     "Valid output with header",
-			input:    "LoadPercentage\n\n  75",
+			input:    "LoadPercentage\n\n75",
 			expected: 75,
 			wantErr:  false,
 		},
 		{
 			name:     "Only value",
-			input:    "  90",
+			input:    "90",
 			expected: 90,
 			wantErr:  false,
 		},
@@ -58,8 +43,7 @@ func TestParseCPULoad(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			collector := &fakeCollector{output: tt.input}
-			result, err := parseCPULoad(context.Background(), collector)
+			result, err := parseCPULoad(tt.input)
 
 			if tt.wantErr {
 				assert.Error(t, err)
@@ -80,13 +64,13 @@ func TestParseFloatMetric(t *testing.T) {
 	}{
 		{
 			name:     "Single valid line",
-			input:    "  75.5",
+			input:    "75.5",
 			expected: 75.5,
 			wantErr:  false,
 		},
 		{
 			name:     "Multiple lines with empty",
-			input:    "\n\n  42\n",
+			input:    "\n\n42\n",
 			expected: 42,
 			wantErr:  false,
 		},
@@ -106,8 +90,7 @@ func TestParseFloatMetric(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			collector := &fakeCollector{output: tt.input}
-			result, err := parseFloatMetric(context.Background(), collector)
+			result, err := parseFloatMetric(tt.input)
 
 			if tt.wantErr {
 				assert.Error(t, err)
@@ -166,8 +149,7 @@ func TestParseDiskIO(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			collector := &fakeCollector{output: tt.input}
-			result, err := parseDiskIO(context.Background(), collector, tt.fieldName)
+			result, err := parseDiskIO(tt.input, tt.fieldName)
 
 			if tt.wantErr {
 				assert.Error(t, err)
@@ -198,12 +180,23 @@ func TestParseDiskReadsPerSec(t *testing.T) {
 			expected: -1.0,
 			wantErr:  true,
 		},
+		{
+			name:     "Invalid value",
+			input:    "DiskReadsPersec : invalid",
+			expected: -1.0,
+			wantErr:  true,
+		},
+		{
+			name:     "Empty input",
+			input:    "",
+			expected: -1.0,
+			wantErr:  true,
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			collector := &fakeCollector{output: tt.input}
-			result, err := parseDiskReadsPerSec(context.Background(), collector)
+			result, err := parseDiskReadsPerSec(tt.input)
 
 			if tt.wantErr {
 				assert.Error(t, err)
@@ -234,12 +227,23 @@ func TestParseDiskWritesPerSec(t *testing.T) {
 			expected: -1.0,
 			wantErr:  true,
 		},
+		{
+			name:     "Invalid value",
+			input:    "DiskWritesPersec : invalid",
+			expected: -1.0,
+			wantErr:  true,
+		},
+		{
+			name:     "Empty input",
+			input:    "",
+			expected: -1.0,
+			wantErr:  true,
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			collector := &fakeCollector{output: tt.input}
-			result, err := parseDiskWritesPerSec(context.Background(), collector)
+			result, err := parseDiskWritesPerSec(tt.input)
 
 			if tt.wantErr {
 				assert.Error(t, err)
@@ -254,53 +258,41 @@ func TestParseDiskWritesPerSec(t *testing.T) {
 func TestParseDiskTransfersPerSec(t *testing.T) {
 	tests := []struct {
 		name        string
-		readOutput  string
-		writeOutput string
+		input       string
 		expectedTPS float64
 		expectError bool
 	}{
 		{
 			name:        "Valid reads and writes",
-			readOutput:  "DiskReadsPersec : 10",
-			writeOutput: "DiskWritesPersec : 20",
+			input:       "DiskReadsPersec : 10\nDiskWritesPersec : 20",
 			expectedTPS: 30,
 			expectError: false,
 		},
 		{
-			name:        "Empty read output",
-			readOutput:  "",
-			writeOutput: "DiskWritesPersec : 5",
+			name:        "Missing reads",
+			input:       "DiskWritesPersec : 5",
+			expectError: true,
+		},
+		{
+			name:        "Missing writes",
+			input:       "DiskReadsPersec : 10",
 			expectError: true,
 		},
 		{
 			name:        "Invalid read value",
-			readOutput:  "DiskReadsPersec : invalid",
-			writeOutput: "DiskWritesPersec : 5",
+			input:       "DiskReadsPersec : invalid\nDiskWritesPersec : 5",
 			expectError: true,
 		},
 		{
-			name:        "Empty write output",
-			readOutput:  "DiskReadsPersec : 10",
-			writeOutput: "",
+			name:        "Invalid write value",
+			input:       "DiskReadsPersec : 10\nDiskWritesPersec : invalid",
 			expectError: true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			readCollector := &fakeCollector{output: tt.readOutput}
-			writeCollector := &fakeCollector{output: tt.writeOutput}
-
-			result, err := parseDiskTransfersPerSecWithParsers(
-				context.Background(),
-				nil,
-				func(ctx context.Context, _ i.ParamCollector) (float64, error) {
-					return parseDiskIO(ctx, readCollector, "DiskReadsPersec")
-				},
-				func(ctx context.Context, _ i.ParamCollector) (float64, error) {
-					return parseDiskIO(ctx, writeCollector, "DiskWritesPersec")
-				},
-			)
+			result, err := parseDiskTransfersPerSec(tt.input)
 
 			if tt.expectError {
 				assert.Error(t, err)

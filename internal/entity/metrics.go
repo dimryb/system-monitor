@@ -10,6 +10,9 @@ type SystemMetrics struct {
 	CPUSystemModePercent float64
 	CPUIdlePercent       float64
 
+	DiskTPS      float64
+	DiskKBPerSec float64
+
 	MemoryUsedMB    int64
 	DiskUsedPercent float64
 }

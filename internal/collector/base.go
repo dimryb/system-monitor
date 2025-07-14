@@ -17,6 +17,9 @@ const (
 	CPUSystemModePercent
 	CPUIdlePercent
 
+	DiskTPS
+	DiskKBPerSec
+
 	MemoryUsedMB
 	DiskUsedPercent
 

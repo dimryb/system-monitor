@@ -1,0 +1,73 @@
+syntax = "proto3";
+
+package systemmonitor;
+
+option go_package = "github.com/dimryb/system-monitor/internal/proto/monitor";
+
+service SystemMonitor {
+  rpc Subscribe(SubscriptionRequest) returns (stream SystemSnapshot);
+}
+
+message SubscriptionRequest {
+  uint32 interval_seconds = 1; // N
+  uint32 window_seconds = 2;   // M
+}
+
+message SystemSnapshot {
+  LoadAverage load_avg = 1;
+  CpuUsage cpu_usage = 2;
+  repeated DiskStats disk_stats = 3;
+  repeated FsUsage fs_usage = 4;
+  repeated ProtocolTraffic protocol_traffic = 5;
+  repeated NetworkConnection connections = 6;
+  repeated TopTalker top_talkers = 7;
+}
+
+message LoadAverage {
+  double one_min = 1;
+  double five_mins = 2;
+  double fifteen_mins = 3;
+}
+
+message CpuUsage {
+  double user = 1;
+  double system = 2;
+  double idle = 3;
+}
+
+message DiskStats {
+  string device = 1;
+  double tps = 2;
+  double kb_per_sec = 3;
+}
+
+message FsUsage {
+  string mount_point = 1;
+  uint64 total_mb = 2;
+  uint64 used_mb = 3;
+  double used_percent = 4;
+  uint64 inodes_total = 5;
+  uint64 inodes_used = 6;
+  double inodes_used_percent = 7;
+}
+
+message ProtocolTraffic {
+  string protocol = 1;
+  uint64 bytes = 2;
+  double percent = 3;
+}
+
+message NetworkConnection {
+  string command = 1;
+  int32 pid = 2;
+  string user = 3;
+  string protocol = 4;
+  int32 port = 5;
+}
+
+message TopTalker {
+  string src = 1;
+  string dst = 2;
+  string protocol = 3;
+  uint64 bps = 4;
+}

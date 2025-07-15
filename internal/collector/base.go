@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/dimryb/system-monitor/internal/entity"
-	i "github.com/dimryb/system-monitor/internal/interface"
 )
 
 const (
@@ -20,6 +19,8 @@ const (
 	DiskTPS
 	DiskKBPerSec
 
+	DiskUsage
+
 	MemoryUsedMB
 	DiskUsedPercent
 
@@ -28,46 +29,6 @@ const (
 
 type metricCollector interface {
 	collect(ctx context.Context) error
-}
-
-type floatMetric struct {
-	value     *float64
-	collector i.ParamCollector
-	parser    func(rawData string) (float64, error)
-}
-
-func (m *floatMetric) collect(ctx context.Context) error {
-	raw, err := m.collector.Collect(ctx)
-	if err != nil {
-		return err
-	}
-
-	val, err := m.parser(raw)
-	if err != nil {
-		return err
-	}
-	*m.value = val
-	return nil
-}
-
-type intMetric struct { //nolint:unused
-	value     *int64
-	collector i.ParamCollector
-	parser    func(rawData string) (int64, error)
-}
-
-func (m *intMetric) collect(ctx context.Context) error { //nolint:unused
-	raw, err := m.collector.Collect(ctx)
-	if err != nil {
-		return err
-	}
-
-	val, err := m.parser(raw)
-	if err != nil {
-		return err
-	}
-	*m.value = val
-	return nil
 }
 
 type BaseCollector struct {

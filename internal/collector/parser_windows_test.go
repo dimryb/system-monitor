@@ -3,6 +3,10 @@
 package collector
 
 import (
+	"encoding/json"
+	"github.com/dimryb/system-monitor/internal/entity"
+	"github.com/stretchr/testify/require"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -300,6 +304,129 @@ func TestParseDiskTransfersPerSec(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 				assert.Equal(t, tt.expectedTPS, result)
+			}
+		})
+	}
+}
+
+func makeMockDiskUsageJSON(disks []map[string]interface{}) string {
+	data, _ := json.Marshal(disks)
+	return string(data)
+}
+
+func TestParserDiskUsage(t *testing.T) {
+	const (
+		totalC = 500_000_000_000
+		freeC  = 100_000_000_000
+		usedC  = totalC - freeC
+
+		totalD = 1_000_000_000_000
+		freeD  = 500_000_000_000
+		usedD  = totalD - freeD
+	)
+	tests := []struct {
+		name     string
+		input    string
+		expected []entity.DiskUsage
+		wantErr  bool
+	}{
+		{
+			name: "Single disk",
+			input: makeMockDiskUsageJSON([]map[string]interface{}{
+				{
+					"Name":      "C:",
+					"Size":      strconv.FormatInt(totalC, 10),
+					"FreeSpace": strconv.FormatInt(freeC, 10),
+				},
+			}),
+			expected: []entity.DiskUsage{
+				{
+					Name:              "C:",
+					TotalMB:           float64(totalC) / (1024 * 1024),
+					UsedMB:            float64(totalC-freeC) / (1024 * 1024),
+					UsedPercent:       float64(usedC*100) / float64(totalC),
+					InodesTotal:       float64(totalC) / 4096,
+					InodesUsed:        (float64(totalC) / 4096) * 0.8,
+					InodesUsedPercent: 80.0,
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "Multiple disks",
+			input: makeMockDiskUsageJSON([]map[string]interface{}{
+				{
+					"Name":      "C:",
+					"Size":      strconv.FormatInt(totalC, 10),
+					"FreeSpace": strconv.FormatInt(freeC, 10),
+				},
+				{
+					"Name":      "D:",
+					"Size":      strconv.FormatInt(totalD, 10),
+					"FreeSpace": strconv.FormatInt(freeD, 10),
+				},
+			}),
+			expected: []entity.DiskUsage{
+				{
+					Name:              "C:",
+					TotalMB:           float64(totalC) / (1024 * 1024),
+					UsedMB:            float64(usedC) / (1024 * 1024),
+					UsedPercent:       float64(usedC*100) / float64(totalC),
+					InodesTotal:       float64(totalC) / 4096,
+					InodesUsed:        (float64(totalC) / 4096) * 0.8,
+					InodesUsedPercent: 80.0,
+				},
+				{
+					Name:              "D:",
+					TotalMB:           float64(totalD) / (1024 * 1024),
+					UsedMB:            float64(usedD) / (1024 * 1024),
+					UsedPercent:       float64(usedD*100) / float64(totalD),
+					InodesTotal:       float64(totalD) / 4096,
+					InodesUsed:        (float64(totalD) / 4096) * 0.5,
+					InodesUsedPercent: 50.0,
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name:     "Empty input",
+			input:    "",
+			expected: nil,
+			wantErr:  true,
+		},
+		{
+			name: "Invalid JSON",
+			input: `
+{
+  "Name": "C:",
+  "Size": "invalid"
+}
+`,
+			expected: nil,
+			wantErr:  true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := parserDiskUsage(tt.input)
+
+			if tt.wantErr {
+				require.Error(t, err)
+				return
+			}
+
+			require.NoError(t, err)
+			require.Len(t, result, len(tt.expected))
+
+			for i := range tt.expected {
+				assert.Equal(t, tt.expected[i].Name, result[i].Name)
+				assert.InDelta(t, tt.expected[i].TotalMB, result[i].TotalMB, 0.1)
+				assert.InDelta(t, tt.expected[i].UsedMB, result[i].UsedMB, 0.1)
+				assert.InDelta(t, tt.expected[i].UsedPercent, result[i].UsedPercent, 0.1)
+				assert.InDelta(t, tt.expected[i].InodesTotal, result[i].InodesTotal, 1)
+				assert.InDelta(t, tt.expected[i].InodesUsed, result[i].InodesUsed, 1)
+				assert.InDelta(t, tt.expected[i].InodesUsedPercent, result[i].InodesUsedPercent, 0.1)
 			}
 		})
 	}

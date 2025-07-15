@@ -1,8 +1,8 @@
 package collector
 
 import (
-	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -23,15 +23,23 @@ func (c CommandCollector) Collect(ctx context.Context) (string, error) {
 
 	cmd := execCommand(ctx, c.command)
 
-	var out bytes.Buffer
+	//fmt.Printf("Executing: %s\n", c.command)
+
+	var out strings.Builder
+	var stderr strings.Builder
 	cmd.Stdout = &out
-	cmd.Stderr = &out
+	cmd.Stderr = &stderr
 
 	err := cmd.Run()
 	stdout := strings.TrimSpace(out.String())
+	stderrOutput := strings.TrimSpace(stderr.String())
 
-	if stdout != "" && err != nil {
-		return stdout, nil
+	if stderrOutput != "" {
+		fmt.Printf("STDERR: %s\n", stderrOutput)
+	}
+
+	if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+		return "", fmt.Errorf("command timed out: %s", c.command)
 	}
 
 	if err != nil {

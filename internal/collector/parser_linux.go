@@ -127,14 +127,37 @@ func parseDiskBytesPerSecWithIostat(rawData string) (float64, error) {
 }
 
 func parseDiskUsage(rawData string) ([]entity.DiskUsage, error) {
-	entries := parseLines(rawData, 5, func(fields []string) bool {
-		_, err := strconv.ParseFloat(fields[1], 64)
-		return err == nil
-	})
+	var result []entity.DiskUsage
 
-	var disks []entity.DiskUsage
-	for _, fields := range entries {
-		usePercentStr := strings.TrimSuffix(fields[4], "%")
+	lines := strings.Split(rawData, "\n")
+	for _, line := range lines {
+		line = sanitizeLine(line)
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+
+		fields := strings.Fields(line)
+		if len(fields) < 5 {
+			continue
+		}
+
+		if fields[0] == "Filesystem" {
+			continue
+		}
+
+		var usePercentStr string
+		for i := 3; i < len(fields); i++ {
+			if strings.HasSuffix(fields[i], "%") {
+				usePercentStr = strings.TrimSuffix(fields[i], "%")
+				break
+			}
+		}
+
+		if usePercentStr == "" {
+			continue
+		}
+
 		usePercent, err := strconv.ParseFloat(usePercentStr, 64)
 		if err != nil {
 			continue
@@ -150,7 +173,7 @@ func parseDiskUsage(rawData string) ([]entity.DiskUsage, error) {
 			continue
 		}
 
-		disks = append(disks, entity.DiskUsage{
+		result = append(result, entity.DiskUsage{
 			Name:        fields[0],
 			TotalMB:     totalMB,
 			UsedMB:      usedMB,
@@ -158,21 +181,33 @@ func parseDiskUsage(rawData string) ([]entity.DiskUsage, error) {
 		})
 	}
 
-	if len(disks) == 0 {
+	if len(result) == 0 {
 		return nil, fmt.Errorf("no disk usage data parsed")
 	}
 
-	return disks, nil
+	return result, nil
 }
 
 func parseDiskInodeUsage(rawData string) ([]entity.DiskUsage, error) {
-	entries := parseLines(rawData, 5, func(fields []string) bool {
-		_, err := strconv.ParseUint(fields[1], 10, 64)
-		return err == nil
-	})
+	var result []entity.DiskUsage
 
-	var disks []entity.DiskUsage
-	for _, fields := range entries {
+	lines := strings.Split(rawData, "\n")
+	for _, line := range lines {
+		line = sanitizeLine(line)
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+
+		fields := strings.Fields(line)
+		if len(fields) < 5 {
+			continue
+		}
+
+		if fields[0] == "Filesystem" {
+			continue
+		}
+
 		ipcentStr := strings.TrimSuffix(fields[4], "%")
 		ipcent, err := strconv.ParseFloat(ipcentStr, 64)
 		if err != nil {
@@ -189,7 +224,7 @@ func parseDiskInodeUsage(rawData string) ([]entity.DiskUsage, error) {
 			continue
 		}
 
-		disks = append(disks, entity.DiskUsage{
+		result = append(result, entity.DiskUsage{
 			Name:              fields[0],
 			InodesTotal:       inodesTotal,
 			InodesUsed:        inodesUsed,
@@ -197,29 +232,19 @@ func parseDiskInodeUsage(rawData string) ([]entity.DiskUsage, error) {
 		})
 	}
 
-	if len(disks) == 0 {
+	if len(result) == 0 {
 		return nil, fmt.Errorf("no inode data parsed")
 	}
 
-	return disks, nil
+	return result, nil
 }
 
-func parseLines(rawData string, minFields int, validLine func(fields []string) bool) [][]string {
-	var result [][]string
-	lines := strings.Split(rawData, "\n")
-	for _, line := range lines {
-		line = strings.TrimSpace(line)
-		if line == "" {
-			continue
+func sanitizeLine(line string) string {
+	var builder strings.Builder
+	for _, r := range line {
+		if r >= 32 && r != 127 {
+			builder.WriteRune(r)
 		}
-		fields := strings.Fields(line)
-		if len(fields) < minFields {
-			continue
-		}
-		if validLine != nil && !validLine(fields) {
-			continue
-		}
-		result = append(result, fields)
 	}
-	return result
+	return builder.String()
 }

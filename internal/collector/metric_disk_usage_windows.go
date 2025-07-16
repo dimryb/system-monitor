@@ -10,18 +10,19 @@ import (
 )
 
 type diskUsageMetric struct {
-	value     *[]entity.DiskUsage
-	collector i.ParamCollector
-	parser    func(rawData string) ([]entity.DiskUsage, error)
+	value          *[]entity.DiskUsage
+	collector      i.ParamCollector
+	collectorInode i.ParamCollector
+	parser         func(rawData string) ([]entity.DiskUsage, error)
 }
 
 func (m *diskUsageMetric) collect(ctx context.Context) error {
-	raw, err := m.collector.Collect(ctx)
+	rawUsage, err := m.collector.Collect(ctx)
 	if err != nil {
 		return err
 	}
 
-	diskUsage, err := m.parser(raw)
+	diskUsage, err := m.parser(rawUsage)
 	if err != nil {
 		return err
 	}

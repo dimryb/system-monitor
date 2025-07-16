@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/dimryb/system-monitor/internal/entity"
 )
 
 func parseFloatMetric(rawData string) (float64, error) {
@@ -122,4 +124,102 @@ func parseDiskBytesPerSecWithIostat(rawData string) (float64, error) {
 	}
 
 	return totalKB, nil
+}
+
+func parseDiskUsage(rawData string) ([]entity.DiskUsage, error) {
+	entries := parseLines(rawData, 5, func(fields []string) bool {
+		_, err := strconv.ParseFloat(fields[1], 64)
+		return err == nil
+	})
+
+	var disks []entity.DiskUsage
+	for _, fields := range entries {
+		usePercentStr := strings.TrimSuffix(fields[4], "%")
+		usePercent, err := strconv.ParseFloat(usePercentStr, 64)
+		if err != nil {
+			continue
+		}
+
+		totalMB, err := strconv.ParseFloat(fields[1], 64)
+		if err != nil {
+			continue
+		}
+
+		usedMB, err := strconv.ParseFloat(fields[2], 64)
+		if err != nil {
+			continue
+		}
+
+		disks = append(disks, entity.DiskUsage{
+			Name:        fields[0],
+			TotalMB:     totalMB,
+			UsedMB:      usedMB,
+			UsedPercent: usePercent,
+		})
+	}
+
+	if len(disks) == 0 {
+		return nil, fmt.Errorf("no disk usage data parsed")
+	}
+
+	return disks, nil
+}
+
+func parseDiskInodeUsage(rawData string) ([]entity.DiskUsage, error) {
+	entries := parseLines(rawData, 5, func(fields []string) bool {
+		_, err := strconv.ParseUint(fields[1], 10, 64)
+		return err == nil
+	})
+
+	var disks []entity.DiskUsage
+	for _, fields := range entries {
+		ipcentStr := strings.TrimSuffix(fields[4], "%")
+		ipcent, err := strconv.ParseFloat(ipcentStr, 64)
+		if err != nil {
+			continue
+		}
+
+		inodesTotal, err := strconv.ParseUint(fields[1], 10, 64)
+		if err != nil {
+			continue
+		}
+
+		inodesUsed, err := strconv.ParseUint(fields[2], 10, 64)
+		if err != nil {
+			continue
+		}
+
+		disks = append(disks, entity.DiskUsage{
+			Name:              fields[0],
+			InodesTotal:       inodesTotal,
+			InodesUsed:        inodesUsed,
+			InodesUsedPercent: ipcent,
+		})
+	}
+
+	if len(disks) == 0 {
+		return nil, fmt.Errorf("no inode data parsed")
+	}
+
+	return disks, nil
+}
+
+func parseLines(rawData string, minFields int, validLine func(fields []string) bool) [][]string {
+	var result [][]string
+	lines := strings.Split(rawData, "\n")
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+		fields := strings.Fields(line)
+		if len(fields) < minFields {
+			continue
+		}
+		if validLine != nil && !validLine(fields) {
+			continue
+		}
+		result = append(result, fields)
+	}
+	return result
 }

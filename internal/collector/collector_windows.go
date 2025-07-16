@@ -67,7 +67,7 @@ func NewSystemCollector(timeout time.Duration) *WindowsCollector {
 				DiskUsage: &diskUsageMetric{
 					value:     &metrics.DiskUsage,
 					collector: NewCommandCollector(diskUsageCommand, timeout),
-					parser:    parserDiskUsage,
+					parser:    parseDiskUsage,
 				},
 			},
 		},

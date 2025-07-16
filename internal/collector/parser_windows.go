@@ -99,7 +99,7 @@ func parseDiskTransfersPerSecWithParsers(
 	return read + write, nil
 }
 
-func parserDiskUsage(rawData string) ([]entity.DiskUsage, error) {
+func parseDiskUsage(rawData string) ([]entity.DiskUsage, error) {
 	rawData = strings.TrimSpace(rawData)
 	if rawData == "" {
 		return nil, fmt.Errorf("empty disk usage data")

@@ -21,7 +21,7 @@ type DiskUsage struct {
 	TotalMB           float64 `json:"total_mb"`
 	UsedMB            float64 `json:"used_mb"`
 	UsedPercent       float64 `json:"used_percent"`
-	InodesTotal       float64 `json:"inodes_total"` // приблизительно
-	InodesUsed        float64 `json:"inodes_used"`
+	InodesTotal       uint64  `json:"inodes_total"`
+	InodesUsed        uint64  `json:"inodes_used"`
 	InodesUsedPercent float64 `json:"inodes_used_percent"`
 }

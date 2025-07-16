@@ -16,7 +16,8 @@ const (
 
 	diskIOCommand = "iostat -d -k 1 2"
 
-	//diskCollectCommand = "df -h /"
+	diskUsageCommand = "df -m --output=source,size,used,pcent,target"
+	diskInodeCommand = "df -i"
 )
 
 type LinuxCollector struct {
@@ -60,6 +61,14 @@ func NewSystemCollector(timeout time.Duration) *LinuxCollector {
 					value:     &metrics.DiskKBPerSec,
 					collector: NewCommandCollector(diskIOCommand, timeout),
 					parser:    parseDiskBytesPerSecWithIostat,
+				},
+
+				DiskUsage: &diskUsageMetric{
+					value:          &metrics.DiskUsage,
+					collectorUsage: NewCommandCollector(diskUsageCommand, timeout),
+					collectorInode: NewCommandCollector(diskInodeCommand, timeout),
+					parserUsage:    parseDiskUsage,
+					parserInode:    parseDiskInodeUsage,
 				},
 			},
 		},

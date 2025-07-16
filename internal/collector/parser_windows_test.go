@@ -4,10 +4,11 @@ package collector
 
 import (
 	"encoding/json"
-	"github.com/dimryb/system-monitor/internal/entity"
-	"github.com/stretchr/testify/require"
 	"strconv"
 	"testing"
+
+	"github.com/dimryb/system-monitor/internal/entity"
+	"github.com/stretchr/testify/require"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -409,7 +410,7 @@ func TestParserDiskUsage(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := parserDiskUsage(tt.input)
+			result, err := parseDiskUsage(tt.input)
 
 			if tt.wantErr {
 				require.Error(t, err)

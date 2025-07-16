@@ -10,7 +10,7 @@ import (
 )
 
 type GlobalCollector struct {
-	collector i.Collector
+	collector i.SystemCollector
 	buffers   []*ClientBuffer
 	mu        sync.RWMutex
 	ctx       context.Context
@@ -21,7 +21,7 @@ type GlobalCollector struct {
 func NewGlobalCollector(ctx context.Context, log i.Logger) *GlobalCollector {
 	ctx, cancel := context.WithCancel(ctx)
 	return &GlobalCollector{
-		collector: collector.NewCollector(time.Second),
+		collector: collector.NewCollector(2 * time.Second),
 		buffers:   make([]*ClientBuffer, 0),
 		ctx:       ctx,
 		cancel:    cancel,

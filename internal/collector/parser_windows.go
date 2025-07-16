@@ -137,8 +137,8 @@ func parseDiskUsage(rawData string) ([]entity.DiskUsage, error) {
 			TotalMB:           totalMB,
 			UsedMB:            used,
 			UsedPercent:       usedPercent,
-			InodesTotal:       inodeTotal,
-			InodesUsed:        inodeUsed,
+			InodesTotal:       uint64(inodeTotal),
+			InodesUsed:        uint64(inodeUsed),
 			InodesUsedPercent: usedPercent,
 		})
 	}

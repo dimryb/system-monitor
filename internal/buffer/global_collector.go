@@ -2,6 +2,7 @@ package buffer
 
 import (
 	"context"
+	"github.com/dimryb/system-monitor/internal/config"
 	"sync"
 	"time"
 
@@ -18,10 +19,10 @@ type GlobalCollector struct {
 	log       i.Logger
 }
 
-func NewGlobalCollector(ctx context.Context, log i.Logger) *GlobalCollector {
+func NewGlobalCollector(ctx context.Context, log i.Logger, cfg *config.MonitorConfig) *GlobalCollector {
 	ctx, cancel := context.WithCancel(ctx)
 	return &GlobalCollector{
-		collector: collector.NewCollector(2 * time.Second),
+		collector: collector.NewSystemCollector(2*time.Second, cfg),
 		buffers:   make([]*ClientBuffer, 0),
 		ctx:       ctx,
 		cancel:    cancel,

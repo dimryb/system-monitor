@@ -24,7 +24,7 @@ func NewMonitorService(ctx context.Context, app i.Application, logger i.Logger, 
 		app:             app,
 		log:             logger,
 		cfg:             cfg,
-		globalCollector: buffer.NewGlobalCollector(ctx, logger),
+		globalCollector: buffer.NewGlobalCollector(ctx, logger, cfg),
 	}
 }
 
@@ -47,7 +47,7 @@ func (m *Monitor) Run(ctx context.Context) error {
 		}
 	}()
 
-	globalCollector := buffer.NewGlobalCollector(ctx, m.log)
+	globalCollector := buffer.NewGlobalCollector(ctx, m.log, m.cfg)
 	buf := globalCollector.Register(15)
 
 	wg.Add(1)

@@ -4,7 +4,6 @@ package collector
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/dimryb/system-monitor/internal/entity"
 	i "github.com/dimryb/system-monitor/internal/interface"
@@ -55,8 +54,6 @@ func (m *diskUsageMetric) collect(ctx context.Context) error {
 	}
 
 	*m.value = diskUsage
-
-	fmt.Println(*m.value)
 	return nil
 }
 

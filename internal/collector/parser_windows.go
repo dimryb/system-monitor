@@ -129,17 +129,11 @@ func parseDiskUsage(rawData string) ([]entity.DiskUsage, error) {
 			usedPercent = used / totalMB * 100
 		}
 
-		inodeTotal := total / 4096
-		inodeUsed := inodeTotal * usedPercent / 100
-
 		result = append(result, entity.DiskUsage{
-			Name:              name,
-			TotalMB:           totalMB,
-			UsedMB:            used,
-			UsedPercent:       usedPercent,
-			InodesTotal:       uint64(inodeTotal),
-			InodesUsed:        uint64(inodeUsed),
-			InodesUsedPercent: usedPercent,
+			Name:        name,
+			TotalMB:     totalMB,
+			UsedMB:      used,
+			UsedPercent: usedPercent,
 		})
 	}
 

@@ -33,7 +33,7 @@ install-lint-deps:
 	sh -s -- -b $(GO_PATH)/bin v1.64.8
 
 lint: install-lint-deps
-	golangci-lint run --config golangci.yml ./... -v
+	golangci-lint run --config golangci.yml ./...
 
 generate:
 	protoc \

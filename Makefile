@@ -39,3 +39,17 @@ generate:
 		--go_out=proto --go_opt=paths=source_relative \
 		--go-grpc_out=proto --go-grpc_opt=paths=source_relative \
 		proto/monitor/*.proto
+
+build-img:
+	docker build \
+        --build-arg LDFLAGS="$(LDFLAGS)" \
+        -t $(DOCKER_IMG) \
+        -f $(DOCKERFILE_PATH) .
+
+build-linux-img:
+	$(MAKE) build-img \
+            DOCKER_IMG=system-monitor:develop \
+            DOCKERFILE_PATH=build/linux/Dockerfile
+
+run-linux-img:
+	docker run --rm system-monitor:develop

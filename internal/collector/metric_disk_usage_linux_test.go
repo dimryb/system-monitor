@@ -16,7 +16,7 @@ type mockParamCollector struct {
 	err      error
 }
 
-func (m *mockParamCollector) Collect(ctx context.Context) (string, error) {
+func (m *mockParamCollector) Collect(_ context.Context) (string, error) {
 	return m.response, m.err
 }
 

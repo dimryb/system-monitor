@@ -127,7 +127,7 @@ func parseDiskBytesPerSecWithIostat(rawData string) (float64, error) {
 }
 
 func parseDiskUsage(rawData string) ([]entity.DiskUsage, error) {
-	var result []entity.DiskUsage
+	result := make([]entity.DiskUsage, 0)
 
 	lines := strings.Split(rawData, "\n")
 	for _, line := range lines {
@@ -189,7 +189,7 @@ func parseDiskUsage(rawData string) ([]entity.DiskUsage, error) {
 }
 
 func parseDiskInodeUsage(rawData string) ([]entity.DiskUsage, error) {
-	var result []entity.DiskUsage
+	result := make([]entity.DiskUsage, 0)
 
 	lines := strings.Split(rawData, "\n")
 	for _, line := range lines {

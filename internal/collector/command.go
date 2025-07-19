@@ -23,8 +23,6 @@ func (c CommandCollector) Collect(ctx context.Context) (string, error) {
 
 	cmd := execCommand(ctx, c.command)
 
-	//fmt.Printf("Executing: %s\n", c.command)
-
 	var out strings.Builder
 	var stderr strings.Builder
 	cmd.Stdout = &out
@@ -43,7 +41,7 @@ func (c CommandCollector) Collect(ctx context.Context) (string, error) {
 	}
 
 	if err != nil {
-		return "", fmt.Errorf("command failed: %v, output: %s", err, stdout)
+		return "", fmt.Errorf("command failed: %w, output: %s", err, stdout)
 	}
 
 	return stdout, nil

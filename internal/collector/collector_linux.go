@@ -3,9 +3,9 @@
 package collector
 
 import (
-	"github.com/dimryb/system-monitor/internal/config"
 	"time"
 
+	"github.com/dimryb/system-monitor/internal/config"
 	"github.com/dimryb/system-monitor/internal/entity"
 )
 

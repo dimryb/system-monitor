@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"flag"
-	"github.com/dimryb/system-monitor/internal/service"
 	"log"
 	"os/signal"
 	"syscall"
@@ -11,6 +10,7 @@ import (
 	"github.com/dimryb/system-monitor/internal/app"
 	"github.com/dimryb/system-monitor/internal/config"
 	"github.com/dimryb/system-monitor/internal/logger"
+	"github.com/dimryb/system-monitor/internal/service"
 )
 
 var (

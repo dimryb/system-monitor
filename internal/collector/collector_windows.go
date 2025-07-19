@@ -12,12 +12,23 @@ import (
 const (
 	cpuCollectCommand = `wmic cpu get loadpercentage`
 
-	cpuUserModeCommand          = `(Get-WmiObject -Namespace "root\CIMV2" -Query "SELECT * FROM Win32_PerfFormattedData_Counters_ProcessorInformation WHERE Name='_Total'").PercentUserTime`
-	cpuSystemModeCollectCommand = `(Get-WmiObject -Namespace "root\CIMV2" -Query "SELECT * FROM Win32_PerfFormattedData_Counters_ProcessorInformation WHERE Name='_Total'").PercentPrivilegedTime`
-	cpuIdleCollectCommand       = `(Get-WmiObject -Namespace "root\CIMV2" -Query "SELECT * FROM Win32_PerfFormattedData_Counters_ProcessorInformation WHERE Name='_Total'").PercentIdleTime`
+	cpuUserModeCommand = `(
+		Get-WmiObject -Namespace "root\CIMV2" ` +
+		`-Query "SELECT * FROM Win32_PerfFormattedData_Counters_ProcessorInformation WHERE Name='_Total'"
+).PercentUserTime`
+	cpuSystemModeCollectCommand = `(
+		Get-WmiObject -Namespace "root\CIMV2" ` +
+		`-Query "SELECT * FROM Win32_PerfFormattedData_Counters_ProcessorInformation WHERE Name='_Total'").PercentPrivilegedTime`
+	cpuIdleCollectCommand = `(
+		Get-WmiObject -Namespace "root\CIMV2" ` +
+		`-Query "SELECT * FROM Win32_PerfFormattedData_Counters_ProcessorInformation WHERE Name='_Total'").PercentIdleTime`
 
-	diskIOCommand          = `(Get-WmiObject -Namespace "root\CIMV2" -Query "SELECT * FROM Win32_PerfFormattedData_PerfDisk_LogicalDisk WHERE Name='_Total'")`
-	diskBytesPerSecCommand = `(Get-WmiObject -Namespace "root\CIMV2" -Query "SELECT * FROM Win32_PerfFormattedData_PerfDisk_LogicalDisk WHERE Name='_Total'").DiskBytesPerSec`
+	diskIOCommand = `(
+		Get-WmiObject -Namespace "root\CIMV2" ` +
+		`-Query "SELECT * FROM Win32_PerfFormattedData_PerfDisk_LogicalDisk WHERE Name='_Total'")`
+	diskBytesPerSecCommand = `(
+		Get-WmiObject -Namespace "root\CIMV2" ` +
+		`-Query "SELECT * FROM Win32_PerfFormattedData_PerfDisk_LogicalDisk WHERE Name='_Total'").DiskBytesPerSec`
 
 	diskUsageCommand = `(Get-WmiObject -Query "SELECT * FROM Win32_LogicalDisk WHERE DriveType=3") | ConvertTo-Json`
 )

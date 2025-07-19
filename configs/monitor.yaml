@@ -7,7 +7,7 @@ grpc:
 metrics:
   cpu:
     enabled: true
-    usagePercent: true
+    usagePercent: false
     userMode: true
     systemMode: true
     idle: true

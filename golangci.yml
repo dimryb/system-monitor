@@ -14,12 +14,16 @@ linters-settings:
         allow:
           - $gostd
           - github.com/ilyakaznacheev/cleanenv
+          - github.com/dimryb/system-monitor
+          - google.golang.org/grpc
+          - google.golang.org/grpc/reflection
       Test:
         files:
           - $test
         allow:
           - $gostd
           - github.com/stretchr/testify
+          - github.com/dimryb/system-monitor
 
 linters:
   disable-all: true

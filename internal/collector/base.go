@@ -50,7 +50,7 @@ func (c *BaseCollector) Collect(ctx context.Context) (*entity.SystemMetrics, err
 		wg.Add(1)
 		go func(name int, collector metricCollector) {
 			defer wg.Done()
-			if err := mc.collect(ctx); err != nil {
+			if err := collector.collect(ctx); err != nil {
 				errChan <- fmt.Errorf("failed to collect metric %q: %w", name, err)
 			}
 		}(ind, mc)

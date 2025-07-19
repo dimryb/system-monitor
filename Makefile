@@ -5,8 +5,10 @@ GIT_HASH := $(shell git log --format="%h" -n 1)
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
     DATE_CMD = date -u +'%Y-%m-%dT%H:%M:%S'
+    GO_PATH := $(shell go env GOPATH)
 else #windows
     DATE_CMD = powershell.exe -Command "Get-Date -Format 'yyyy-MM-ddTHH:mm:ss'"
+    GO_PATH := $(shell go env GOPATH | tr '\\' '/')
 endif
 
 LDFLAGS := -X main.release="develop" \
@@ -28,10 +30,10 @@ test:
 install-lint-deps:
 	(which golangci-lint > /dev/null) || \
 	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | \
-	sh -s -- -b $(shell go env GOPATH)/bin v2.2.1
+	sh -s -- -b $(GO_PATH)/bin v1.64.8
 
 lint: install-lint-deps
-	golangci-lint run ./... -v
+	golangci-lint run --config golangci.yml ./... -v
 
 generate:
 	protoc \

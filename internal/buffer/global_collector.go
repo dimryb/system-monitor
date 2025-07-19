@@ -6,11 +6,12 @@ import (
 	"time"
 
 	"github.com/dimryb/system-monitor/internal/collector"
+	"github.com/dimryb/system-monitor/internal/config"
 	i "github.com/dimryb/system-monitor/internal/interface"
 )
 
 type GlobalCollector struct {
-	collector i.Collector
+	collector i.SystemCollector
 	buffers   []*ClientBuffer
 	mu        sync.RWMutex
 	ctx       context.Context
@@ -18,10 +19,10 @@ type GlobalCollector struct {
 	log       i.Logger
 }
 
-func NewGlobalCollector(ctx context.Context, log i.Logger) *GlobalCollector {
+func NewGlobalCollector(ctx context.Context, log i.Logger, cfg *config.MonitorConfig) *GlobalCollector {
 	ctx, cancel := context.WithCancel(ctx)
 	return &GlobalCollector{
-		collector: collector.NewCollector(time.Second),
+		collector: collector.NewSystemCollector(2*time.Second, cfg),
 		buffers:   make([]*ClientBuffer, 0),
 		ctx:       ctx,
 		cancel:    cancel,

@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"flag"
-	"github.com/dimryb/system-monitor/internal/service"
 	"log"
 	"os/signal"
 	"syscall"
@@ -11,11 +10,10 @@ import (
 	"github.com/dimryb/system-monitor/internal/app"
 	"github.com/dimryb/system-monitor/internal/config"
 	"github.com/dimryb/system-monitor/internal/logger"
+	"github.com/dimryb/system-monitor/internal/service"
 )
 
-var (
-	configPath string
-)
+var configPath string
 
 func init() {
 	flag.StringVar(&configPath, "config", "configs/monitor.yaml", "Path to configuration file")

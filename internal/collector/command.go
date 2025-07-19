@@ -1,31 +1,48 @@
 package collector
 
 import (
-	"bytes"
 	"context"
-	"os/exec"
+	"errors"
+	"fmt"
 	"strings"
 	"time"
 )
 
-type commandCollector struct {
+type CommandCollector struct {
 	command string
 	timeout time.Duration
 }
 
-func NewCommandCollector(command string, timeout time.Duration) *commandCollector {
-	return &commandCollector{command, timeout}
+func NewCommandCollector(command string, timeout time.Duration) *CommandCollector {
+	return &CommandCollector{command, timeout}
 }
 
-func (c commandCollector) Collect(ctx context.Context) (string, error) {
+func (c CommandCollector) Collect(ctx context.Context) (string, error) {
 	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, "bash", "-c", c.command) //nolint:gosec
-	var out bytes.Buffer
+	cmd := execCommand(ctx, c.command)
+
+	var out strings.Builder
+	var stderr strings.Builder
 	cmd.Stdout = &out
-	if err := cmd.Run(); err != nil {
-		return "", err
+	cmd.Stderr = &stderr
+
+	err := cmd.Run()
+	stdout := strings.TrimSpace(out.String())
+	stderrOutput := strings.TrimSpace(stderr.String())
+
+	if stderrOutput != "" {
+		fmt.Printf("STDERR: %s\n", stderrOutput)
 	}
-	return strings.TrimSpace(out.String()), nil
+
+	if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+		return "", fmt.Errorf("command timed out: %s", c.command)
+	}
+
+	if err != nil {
+		return "", fmt.Errorf("command failed: %w, output: %s", err, stdout)
+	}
+
+	return stdout, nil
 }

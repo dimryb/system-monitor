@@ -3,3 +3,22 @@ log:
 
 grpc:
   port: 50051
+
+metrics:
+  cpu:
+    enabled: true
+    usagePercent: false
+    userMode: true
+    systemMode: true
+    idle: true
+
+  disk:
+    enabled: true
+    tps: true
+    kbPerSec: true
+    usage: true
+
+  network:
+    enabled: false
+    topTalkersByProtocol: true
+    topTalkersByTraffic: true

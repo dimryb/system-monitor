@@ -1,4 +1,3 @@
 package interfaces
 
-type Application interface {
-}
+type Application interface{}

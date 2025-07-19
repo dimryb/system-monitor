@@ -18,10 +18,12 @@ const (
 ).PercentUserTime`
 	cpuSystemModeCollectCommand = `(
 		Get-WmiObject -Namespace "root\CIMV2" ` +
-		`-Query "SELECT * FROM Win32_PerfFormattedData_Counters_ProcessorInformation WHERE Name='_Total'").PercentPrivilegedTime`
+		`-Query "SELECT * FROM Win32_PerfFormattedData_Counters_ProcessorInformation WHERE Name='_Total'"
+).PercentPrivilegedTime`
 	cpuIdleCollectCommand = `(
 		Get-WmiObject -Namespace "root\CIMV2" ` +
-		`-Query "SELECT * FROM Win32_PerfFormattedData_Counters_ProcessorInformation WHERE Name='_Total'").PercentIdleTime`
+		`-Query "SELECT * FROM Win32_PerfFormattedData_Counters_ProcessorInformation WHERE Name='_Total'"
+).PercentIdleTime`
 
 	diskIOCommand = `(
 		Get-WmiObject -Namespace "root\CIMV2" ` +

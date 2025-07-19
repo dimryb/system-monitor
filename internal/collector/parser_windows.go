@@ -110,8 +110,7 @@ func parseDiskUsage(rawData string) ([]entity.DiskUsage, error) {
 		return nil, fmt.Errorf("failed to parse disk usage JSON: %w", err)
 	}
 
-	var result []entity.DiskUsage
-
+	result := make([]entity.DiskUsage, 0, len(disks))
 	for _, d := range disks {
 		name, ok := d["Name"].(string)
 		if !ok || name == "" {

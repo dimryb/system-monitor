@@ -59,7 +59,7 @@ func (c *BaseCollector) Collect(ctx context.Context) (*entity.SystemMetrics, err
 	wg.Wait()
 	close(errChan)
 
-	var errs []error
+	errs := make([]error, 0, cap(errChan))
 	for err := range errChan {
 		errs = append(errs, err)
 	}

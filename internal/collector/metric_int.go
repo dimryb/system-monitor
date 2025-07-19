@@ -2,6 +2,7 @@ package collector
 
 import (
 	"context"
+
 	i "github.com/dimryb/system-monitor/internal/interface"
 )
 

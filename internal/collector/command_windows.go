@@ -8,5 +8,5 @@ import (
 )
 
 func execCommand(ctx context.Context, command string) *exec.Cmd {
-	return exec.CommandContext(ctx, "powershell.exe", "-NoProfile", "-Command", command) //nolint:gosec
+	return exec.CommandContext(ctx, "powershell.exe", "-NoProfile", "-Command", command)
 }

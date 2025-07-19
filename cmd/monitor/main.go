@@ -13,9 +13,7 @@ import (
 	"github.com/dimryb/system-monitor/internal/service"
 )
 
-var (
-	configPath string
-)
+var configPath string
 
 func init() {
 	flag.StringVar(&configPath, "config", "configs/monitor.yaml", "Path to configuration file")

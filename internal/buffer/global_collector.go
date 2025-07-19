@@ -2,11 +2,11 @@ package buffer
 
 import (
 	"context"
-	"github.com/dimryb/system-monitor/internal/config"
 	"sync"
 	"time"
 
 	"github.com/dimryb/system-monitor/internal/collector"
+	"github.com/dimryb/system-monitor/internal/config"
 	i "github.com/dimryb/system-monitor/internal/interface"
 )
 

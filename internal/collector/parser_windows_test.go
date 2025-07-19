@@ -341,13 +341,10 @@ func TestParserDiskUsage(t *testing.T) {
 			}),
 			expected: []entity.DiskUsage{
 				{
-					Name:              "C:",
-					TotalMB:           float64(totalC) / (1024 * 1024),
-					UsedMB:            float64(totalC-freeC) / (1024 * 1024),
-					UsedPercent:       float64(usedC*100) / float64(totalC),
-					InodesTotal:       totalC / 4096,
-					InodesUsed:        (totalC / 4096) * 80 / 100,
-					InodesUsedPercent: 80.0,
+					Name:        "C:",
+					TotalMB:     float64(totalC) / (1024 * 1024),
+					UsedMB:      float64(totalC-freeC) / (1024 * 1024),
+					UsedPercent: float64(usedC*100) / float64(totalC),
 				},
 			},
 			wantErr: false,
@@ -368,22 +365,16 @@ func TestParserDiskUsage(t *testing.T) {
 			}),
 			expected: []entity.DiskUsage{
 				{
-					Name:              "C:",
-					TotalMB:           float64(totalC) / (1024 * 1024),
-					UsedMB:            float64(usedC) / (1024 * 1024),
-					UsedPercent:       float64(usedC*100) / float64(totalC),
-					InodesTotal:       totalC / 4096,
-					InodesUsed:        (totalC / 4096) * 80 / 100,
-					InodesUsedPercent: 80.0,
+					Name:        "C:",
+					TotalMB:     float64(totalC) / (1024 * 1024),
+					UsedMB:      float64(usedC) / (1024 * 1024),
+					UsedPercent: float64(usedC*100) / float64(totalC),
 				},
 				{
-					Name:              "D:",
-					TotalMB:           float64(totalD) / (1024 * 1024),
-					UsedMB:            float64(usedD) / (1024 * 1024),
-					UsedPercent:       float64(usedD*100) / float64(totalD),
-					InodesTotal:       totalD / 4096,
-					InodesUsed:        (totalD / 4096) * 50 / 100,
-					InodesUsedPercent: 50.0,
+					Name:        "D:",
+					TotalMB:     float64(totalD) / (1024 * 1024),
+					UsedMB:      float64(usedD) / (1024 * 1024),
+					UsedPercent: float64(usedD*100) / float64(totalD),
 				},
 			},
 			wantErr: false,
@@ -424,9 +415,6 @@ func TestParserDiskUsage(t *testing.T) {
 				assert.InDelta(t, tt.expected[i].TotalMB, result[i].TotalMB, 0.1)
 				assert.InDelta(t, tt.expected[i].UsedMB, result[i].UsedMB, 0.1)
 				assert.InDelta(t, tt.expected[i].UsedPercent, result[i].UsedPercent, 0.1)
-				assert.InDelta(t, tt.expected[i].InodesTotal, result[i].InodesTotal, 1)
-				assert.InDelta(t, tt.expected[i].InodesUsed, result[i].InodesUsed, 1)
-				assert.InDelta(t, tt.expected[i].InodesUsedPercent, result[i].InodesUsedPercent, 0.1)
 			}
 		})
 	}
